@@ -13,31 +13,28 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-  
+
     if (!email || !password) {
       setError("Enter email and password");
       return;
     }
-  
+
     setLoading(true);
-  
+
     try {
-      const res = await api.post("/auth/login", { email, password });
-  
-      const token = res.data.token;
-  
-      if (!token) {
-        throw new Error("Token not received from server");
-      }
-  
-      localStorage.setItem("token", token);
-  
+
+      await api.post("/auth/login", { email, password });
+
+      
       navigate("/dashboard");
-  
+
     } catch (err) {
-      setError(err?.response?.data?.message || err.message || "Invalid credentials");
+      setError(
+        err?.response?.data?.message ||
+        "Invalid email or password"
+      );
     }
-  
+
     setLoading(false);
   };
 
@@ -47,6 +44,7 @@ export default function Login() {
 
       <form onSubmit={handleLogin} className="auth-form">
         <input
+          type="email"
           className="auth-input"
           placeholder="Email"
           value={email}
@@ -61,14 +59,13 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="auth-btn" disabled={loading}>
+        <button type="submit" className="auth-btn" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
 
         {error && <p className="auth-error">{error}</p>}
       </form>
 
-      {/* NEW */}
       <p className="auth-link">
         <Link to="/forgot-password">Forgot Password?</Link>
       </p>

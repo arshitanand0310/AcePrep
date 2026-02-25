@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-    baseURL: "http://localhost:5001/api",
+    baseURL: import.meta.env.VITE_API_URL + "/api",
     withCredentials: true, // for cookies
 });
 
@@ -31,18 +31,21 @@ const processQueue = (error) => {
     failedQueue = [];
 };
 
+
+
 API.interceptors.response.use(
     (response) => response,
 
     async(error) => {
         const originalRequest = error.config;
 
-
+        // Backend unreachable
         if (!error.response) {
             console.error("🚨 Backend unreachable");
             return Promise.reject(error);
         }
 
+        // Skip refresh for auth routes
         if (
             originalRequest.url.includes("/auth/login") ||
             originalRequest.url.includes("/auth/register") ||
@@ -51,7 +54,7 @@ API.interceptors.response.use(
             return Promise.reject(error);
         }
 
-
+        // Handle 401 (expired access token)
         if (error.response.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {

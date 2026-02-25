@@ -9,15 +9,16 @@ export default function LiveInterview() {
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [answer, setAnswer] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  
+  const [loading, setLoading] = useState(true);      
+  const [submitting, setSubmitting] = useState(false); 
+
+
   useEffect(() => {
     const loadInterview = async () => {
       try {
         const { data } = await api.get(`/interviews/result/${id}`);
 
-        
         if (data.completed) {
           navigate("/dashboard", { replace: true });
           return;
@@ -35,9 +36,11 @@ export default function LiveInterview() {
     loadInterview();
   }, [id, navigate]);
 
-  
+
   const submitAnswer = async () => {
-    if (!answer.trim()) return;
+    if (!answer.trim() || submitting) return;
+
+    setSubmitting(true);
 
     try {
       const { data } = await api.post("/interviews/answer", {
@@ -46,7 +49,6 @@ export default function LiveInterview() {
         answer
       });
 
-      
       if (data.completed) {
         navigate(`/result/${id}`, { replace: true });
         return;
@@ -58,16 +60,30 @@ export default function LiveInterview() {
     } catch (err) {
       console.error(err);
       alert("Failed to submit answer");
+    } finally {
+      setSubmitting(false);
     }
   };
 
  
-  if (loading) return <h2 className="live-loading">Preparing your interview...</h2>;
-  if (!questions.length) return <h2 className="live-loading">Interview unavailable</h2>;
 
-  
+  if (loading)
+    return <h2 className="live-loading">Preparing your interview...</h2>;
+
+  if (!questions.length)
+    return <h2 className="live-loading">Interview unavailable</h2>;
+
   return (
     <div className="live-container">
+
+      
+      {submitting && (
+        <div className="live-overlay">
+          <div className="live-spinner"></div>
+          <p>AI is evaluating your answer...</p>
+        </div>
+      )}
+
       <h2>
         Question {current + 1} / {questions.length}
       </h2>
@@ -82,13 +98,15 @@ export default function LiveInterview() {
         onChange={(e) => setAnswer(e.target.value)}
         placeholder="Type your answer..."
         className="live-textarea"
+        disabled={submitting}
       />
 
       <button
         onClick={submitAnswer}
         className="live-btn"
+        disabled={submitting}
       >
-        Next
+        {submitting ? "Evaluating..." : "Next"}
       </button>
     </div>
   );

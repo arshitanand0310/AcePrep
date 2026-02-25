@@ -16,21 +16,29 @@ dotenv.config();
 const app = express();
 
 app.use(
-    helmet({
-        crossOriginResourcePolicy: false,
-    })
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
 );
 
 app.use(
-    cors({
-        origin: process.env.FRONTEND_URL,
-        credentials: true,
-    })
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (origin.includes("vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
 );
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+  windowMs: 15 * 60 * 1000,
+  max: 100,
 });
 
 app.use(limiter);
@@ -40,18 +48,18 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-    if (req.body && typeof req.body === "object") {
-        for (let key in req.body) {
-            if (key.includes("$") || key.includes(".")) {
-                delete req.body[key];
-            }
-        }
+  if (req.body && typeof req.body === "object") {
+    for (let key in req.body) {
+      if (key.includes("$") || key.includes(".")) {
+        delete req.body[key];
+      }
     }
-    next();
+  }
+  next();
 });
 
 app.get("/", (req, res) => {
-    res.json({ message: "AcePrep API running 🚀" });
+  res.json({ message: "AcePrep API running 🚀" });
 });
 
 app.use("/api/auth", authRoutes);
@@ -60,31 +68,32 @@ app.use("/api/interviews", interviewRoutes);
 app.use("/api/feedbacks", feedbackRoutes);
 
 app.use("/api", (req, res) => {
-    res.status(404).json({
-        message: "API route not found",
-        path: req.originalUrl,
-    });
+  res.status(404).json({
+    message: "API route not found",
+    path: req.originalUrl,
+  });
 });
 
 app.use((err, req, res, next) => {
-    console.error("GLOBAL ERROR:", err);
-    res.status(500).json({
-        message: process.env.NODE_ENV === "production" ?
-            "Something went wrong" :
-            err.message,
-    });
+  console.error("GLOBAL ERROR:", err);
+  res.status(500).json({
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong"
+        : err.message,
+  });
 });
 
 const PORT = process.env.PORT || 5001;
 
 mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("MongoDB connected");
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        console.error("DB connection failed:", err.message);
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
+  })
+  .catch((err) => {
+    console.error("DB connection failed:", err.message);
+  });

@@ -18,6 +18,15 @@ const generateRefreshToken = (id) => {
 };
 
 
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+};
+
+
+
 export const register = async(req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -37,19 +46,14 @@ export const register = async(req, res) => {
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
 
-        // cookies
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 15 * 60 * 1000
+            ...cookieOptions,
+            maxAge: 15 * 60 * 1000,
         });
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         res.status(201).json({
@@ -57,8 +61,8 @@ export const register = async(req, res) => {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
-            }
+                email: user.email,
+            },
         });
 
     } catch (error) {
@@ -67,7 +71,8 @@ export const register = async(req, res) => {
     }
 };
 
-/* Login user */
+
+
 export const login = async(req, res) => {
     try {
         const { email, password } = req.body;
@@ -86,17 +91,13 @@ export const login = async(req, res) => {
         const refreshToken = generateRefreshToken(user._id);
 
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 15 * 60 * 1000
+            ...cookieOptions,
+            maxAge: 15 * 60 * 1000,
         });
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         res.json({
@@ -104,8 +105,8 @@ export const login = async(req, res) => {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
-            }
+                email: user.email,
+            },
         });
 
     } catch (error) {
@@ -114,7 +115,8 @@ export const login = async(req, res) => {
     }
 };
 
-/* REFRESH ACCESS TOKEN */
+
+
 export const refreshToken = async(req, res) => {
     try {
         const token = req.cookies.refreshToken;
@@ -131,10 +133,8 @@ export const refreshToken = async(req, res) => {
         const newAccessToken = generateAccessToken(user._id);
 
         res.cookie("accessToken", newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 15 * 60 * 1000
+            ...cookieOptions,
+            maxAge: 15 * 60 * 1000,
         });
 
         res.json({ message: "Access token refreshed" });
@@ -144,15 +144,17 @@ export const refreshToken = async(req, res) => {
     }
 };
 
-/* LOGOUT USER */
+
+
 export const logout = (req, res) => {
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
 
     res.json({ message: "Logged out successfully" });
 };
 
-/* FORGOT PASSWORD */
+
+
 export const forgotPassword = async(req, res) => {
     try {
         const { email } = req.body;
@@ -177,7 +179,7 @@ export const forgotPassword = async(req, res) => {
 
         res.json({
             message: "Reset link generated",
-            resetLink
+            resetLink,
         });
 
     } catch (error) {
@@ -186,7 +188,8 @@ export const forgotPassword = async(req, res) => {
     }
 };
 
-/* RESET PASSWORD */
+
+
 export const resetPassword = async(req, res) => {
     try {
         const { token } = req.params;
@@ -202,7 +205,7 @@ export const resetPassword = async(req, res) => {
 
         const user = await User.findOne({
             resetPasswordToken: hashedToken,
-            resetPasswordExpire: { $gt: new Date() }
+            resetPasswordExpire: { $gt: new Date() },
         }).select("+password");
 
         if (!user)
@@ -222,13 +225,12 @@ export const resetPassword = async(req, res) => {
     }
 };
 
-/* GET CURRENT USER */
+
+
 export const getMe = async(req, res) => {
     try {
-        const user = await User.findById(req.user).select("-password");
-
+        const user = await User.findById(req.user.id).select("-password");
         res.json(user);
-
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch user" });
     }

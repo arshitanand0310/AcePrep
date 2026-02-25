@@ -13,24 +13,31 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
+  
     if (!email || !password) {
       setError("Enter email and password");
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
-      const { data } = await api.post("/auth/login", { email, password });
-
-      localStorage.setItem("token", data.token);
-      window.location.replace("/dashboard");
-
+      const res = await api.post("/auth/login", { email, password });
+  
+      const token = res.data.token;
+  
+      if (!token) {
+        throw new Error("Token not received from server");
+      }
+  
+      localStorage.setItem("token", token);
+  
+      navigate("/dashboard");
+  
     } catch (err) {
-      setError(err?.response?.data?.message || "Invalid credentials");
+      setError(err?.response?.data?.message || err.message || "Invalid credentials");
     }
-
+  
     setLoading(false);
   };
 

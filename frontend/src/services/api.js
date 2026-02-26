@@ -8,6 +8,7 @@ const baseURL =
     "http://localhost:5000/api";
 
 
+
 const API = axios.create({
     baseURL,
     withCredentials: true,
@@ -52,14 +53,19 @@ API.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        const url = originalRequest?.url || "";
+
 
         if (
-            originalRequest.url.includes("/auth/login") ||
-            originalRequest.url.includes("/auth/register") ||
-            originalRequest.url.includes("/auth/refresh")
+            url.includes("/auth/login") ||
+            url.includes("/auth/register") ||
+            url.includes("/auth/refresh") ||
+            url.includes("/auth/me") ||
+            url.includes("/auth/logout")
         ) {
             return Promise.reject(error);
         }
+
 
 
         if (error.response.status === 401 && !originalRequest._retry) {

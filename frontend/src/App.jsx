@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import api from "./services/api";
 
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -15,7 +16,7 @@ import ResetPassword from "./pages/ResetPassword";
 
 /*
    AUTH LISTENER
- */
+*/
 function AuthListener() {
   const navigate = useNavigate();
 
@@ -32,21 +33,58 @@ function AuthListener() {
 }
 
 /*
-   PRIVATE ROUTE
+   PRIVATE ROUTE (Cookie Based)
 */
 function PrivateRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await api.get("/auth/me");
+        setAuthenticated(true);
+      } catch {
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) return null;
+
+  return authenticated ? children : <Navigate to="/login" replace />;
 }
 
-/* 
- PUBLIC ROUTE
+/*
+   PUBLIC ROUTE (Cookie Based)
 */
 function PublicRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? <Navigate to="/dashboard" replace /> : children;
-}
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await api.get("/auth/me");
+        setAuthenticated(true);
+      } catch {
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) return null;
+
+  return authenticated ? <Navigate to="/dashboard" replace /> : children;
+}
 
 export default function App() {
   return (
@@ -55,14 +93,14 @@ export default function App() {
 
       <Routes>
 
-       
+        
         <Route path="/" element={<Landing />} />
 
         
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
-        
+       
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/start-interview" element={<PrivateRoute><StartInterview /></PrivateRoute>} />
         <Route path="/resume-upload" element={<PrivateRoute><ResumeUpload /></PrivateRoute>} />

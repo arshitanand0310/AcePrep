@@ -22,20 +22,27 @@ export default function Login() {
     setLoading(true);
 
     try {
+      const res = await api.post("/auth/login", { email, password });
 
-      await api.post("/auth/login", { email, password });
+      // 🔥 If you are using token in response
+      if (res?.data?.token) {
+        localStorage.setItem("token", res.data.token);
+      }
 
-      
-      navigate("/dashboard");
+      // Small delay to ensure state updates properly
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 200);
 
     } catch (err) {
+      console.log("Login error:", err);
       setError(
         err?.response?.data?.message ||
-        "Invalid email or password"
+        "Login failed. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-
+/* ================= TOKEN GENERATORS ================= */
 
 const generateAccessToken = (id) => {
     return jwt.sign({ id },
@@ -17,7 +17,7 @@ const generateRefreshToken = (id) => {
     );
 };
 
-
+/* ================= COOKIE OPTIONS ================= */
 
 const cookieOptions = {
     httpOnly: true,
@@ -25,11 +25,13 @@ const cookieOptions = {
     sameSite: "none",
 };
 
-
+/* ================= REGISTER ================= */
 
 export const register = async(req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const name = req.body.name?.trim();
+        const email = req.body.email?.toLowerCase().trim();
+        const password = req.body.password?.trim();
 
         if (!name || !email || !password)
             return res.status(400).json({ message: "All fields are required" });
@@ -38,10 +40,17 @@ export const register = async(req, res) => {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
 
         const existingUser = await User.findOne({ email });
+
         if (existingUser)
             return res.status(400).json({ message: "Email already registered" });
 
-        const user = await User.create({ name, email, password });
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+        });
 
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
@@ -71,11 +80,15 @@ export const register = async(req, res) => {
     }
 };
 
-
+/* ================= LOGIN ================= */
 
 export const login = async(req, res) => {
     try {
-        const { email, password } = req.body;
+        const email = req.body.email?.toLowerCase().trim();
+        const password = req.body.password?.trim();
+
+        if (!email || !password)
+            return res.status(400).json({ message: "Email and password required" });
 
         const user = await User.findOne({ email }).select("+password");
 
@@ -115,7 +128,7 @@ export const login = async(req, res) => {
     }
 };
 
-
+/* ================= REFRESH TOKEN ================= */
 
 export const refreshToken = async(req, res) => {
     try {
@@ -127,6 +140,7 @@ export const refreshToken = async(req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 
         const user = await User.findById(decoded.id);
+
         if (!user)
             return res.status(401).json({ message: "User not found" });
 
@@ -144,7 +158,7 @@ export const refreshToken = async(req, res) => {
     }
 };
 
-
+/* ================= LOGOUT ================= */
 
 export const logout = (req, res) => {
     res.clearCookie("accessToken", cookieOptions);
@@ -153,13 +167,14 @@ export const logout = (req, res) => {
     res.json({ message: "Logged out successfully" });
 };
 
-
+/* ================= FORGOT PASSWORD ================= */
 
 export const forgotPassword = async(req, res) => {
     try {
-        const { email } = req.body;
+        const email = req.body.email?.toLowerCase().trim();
 
         const user = await User.findOne({ email });
+
         if (!user)
             return res.status(404).json({ message: "User not found" });
 
@@ -188,12 +203,12 @@ export const forgotPassword = async(req, res) => {
     }
 };
 
-
+/* ================= RESET PASSWORD ================= */
 
 export const resetPassword = async(req, res) => {
     try {
         const { token } = req.params;
-        const { password } = req.body;
+        const password = req.body.password?.trim();
 
         if (!password || password.length < 6)
             return res.status(400).json({ message: "Password must be at least 6 characters" });
@@ -211,7 +226,9 @@ export const resetPassword = async(req, res) => {
         if (!user)
             return res.status(400).json({ message: "Invalid or expired reset link" });
 
-        user.password = password;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        user.password = hashedPassword;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
 
@@ -225,7 +242,7 @@ export const resetPassword = async(req, res) => {
     }
 };
 
-
+/* ================= GET ME ================= */
 
 export const getMe = async(req, res) => {
     try {

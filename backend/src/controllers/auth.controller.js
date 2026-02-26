@@ -26,7 +26,8 @@ const generateRefreshToken = (id) => {
 const cookieOptions = {
   httpOnly: true,
   secure: true,       
-  sameSite: "none",    
+  sameSite: "none",   
+  path: "/",          
 };
 
 
@@ -159,17 +160,8 @@ export const refreshToken = async (req, res) => {
 
 
 export const logout = (req, res) => {
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
-
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
+  res.clearCookie("accessToken", cookieOptions);
+  res.clearCookie("refreshToken", cookieOptions);
 
   res.status(200).json({ message: "Logged out successfully" });
 };

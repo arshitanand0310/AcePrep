@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
@@ -24,8 +25,8 @@ const generateRefreshToken = (id) => {
 
 const cookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: "none",
+  secure: true,       
+  sameSite: "none",    
 };
 
 
@@ -43,15 +44,13 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
 
     const existingUser = await User.findOne({ email });
-
     if (existingUser)
       return res.status(400).json({ message: "Email already registered" });
-
 
     const user = await User.create({
       name,
       email,
-      password,
+      password, 
     });
 
     const accessToken = generateAccessToken(user._id);
@@ -93,12 +92,10 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Email and password required" });
 
     const user = await User.findOne({ email }).select("+password");
-
     if (!user)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    const match = await user.comparePassword(password);
-
+    const match = await bcrypt.compare(password, user.password);
     if (!match)
       return res.status(400).json({ message: "Invalid email or password" });
 
@@ -115,7 +112,7 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({
+    res.status(200).json({
       message: "Login successful",
       user: {
         id: user._id,
@@ -140,7 +137,6 @@ export const refreshToken = async (req, res) => {
       return res.status(401).json({ message: "No refresh token" });
 
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-
     const user = await User.findById(decoded.id);
 
     if (!user)
@@ -153,7 +149,7 @@ export const refreshToken = async (req, res) => {
       maxAge: 15 * 60 * 1000,
     });
 
-    res.json({ message: "Access token refreshed" });
+    res.status(200).json({ message: "Access token refreshed" });
 
   } catch (error) {
     res.status(401).json({ message: "Invalid refresh token" });
@@ -163,10 +159,19 @@ export const refreshToken = async (req, res) => {
 
 
 export const logout = (req, res) => {
-  res.clearCookie("accessToken", cookieOptions);
-  res.clearCookie("refreshToken", cookieOptions);
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
 
-  res.json({ message: "Logged out successfully" });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+
+  res.status(200).json({ message: "Logged out successfully" });
 };
 
 
@@ -174,7 +179,6 @@ export const logout = (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const email = req.body.email?.toLowerCase().trim();
-
     const user = await User.findOne({ email });
 
     if (!user)
@@ -194,7 +198,7 @@ export const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    res.json({
+    res.status(200).json({
       message: "Reset link generated",
       resetLink,
     });
@@ -234,7 +238,7 @@ export const resetPassword = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Password updated successfully" });
+    res.status(200).json({ message: "Password updated successfully" });
 
   } catch (error) {
     console.error("Reset password error:", error);
@@ -242,10 +246,12 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+
+
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch user" });
   }

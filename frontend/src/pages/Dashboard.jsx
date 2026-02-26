@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import ScrollToTopButton from "./ScrollToTopButton";
-import api from "../services/api"; 
+import ScrollToTopButton from "./ScrollToTopButton"; 
 
 const faqs = [
   {
@@ -24,34 +23,39 @@ const faqs = [
     q: "Which AI model powers AcePrep?",
     a: "AcePrep uses the Groq API for ultra fast, real time AI responses making your interviews feel natural and fluid, just like talking to a real interviewer.",
   },
+
+  
   {
     q: "Is my resume and interview data secure?",
-    a: "Yes. Your resume and interview responses are securely stored and never shared with third parties.",
+    a: "Yes. Your resume and interview responses are securely stored and never shared with third parties. We prioritize user privacy and data protection at every step.",
   },
+
+  
   {
     q: "Does AcePrep simulate real company interviews?",
-    a: "Yes. AcePrep mirrors real world interview scenarios focusing on reasoning and problem solving.",
+    a: "Yes. AcePrep is designed to mirror real world interview scenarios. Questions focus on reasoning, trade offs, problem solving, and communication similar to actual technical interviews at top companies.",
   },
+
+  
   {
     q: "Can I track my improvement over time?",
-    a: "Absolutely. Your past interviews are saved with detailed scores and feedback.",
+    a: "Absolutely. Your past interviews are saved with detailed scores and feedback, allowing you to compare performance, identify patterns, and continuously improve your interview skills.",
   },
+
+  
   {
-    q: "What makes AcePrep different from other platforms?",
-    a: "AcePrep generates dynamic, personalized interviews powered by AI.",
+    q: "What makes AcePrep different from other interview platforms?",
+    a: "Unlike static question banks, AcePrep generates dynamic, personalized interviews powered by AI. Every session adapts to your profile, difficulty level, and responses making each interview unique.",
   },
 ];
 
 function FAQItem({ q, a }) {
   const [open, setOpen] = useState(false);
-
   return (
     <div className={`faq-item${open ? " open" : ""}`}>
       <button className="faq-q" onClick={() => setOpen(!open)}>
         {q}
-        <span className="faq-chevron material-symbols-outlined">
-          expand_more
-        </span>
+        <span className="faq-chevron material-symbols-outlined">expand_more</span>
       </button>
       <div className="faq-a">{a}</div>
     </div>
@@ -61,30 +65,21 @@ function FAQItem({ q, a }) {
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  
-  const handleLogout = async () => {
-    try {
-      await api.post("/auth/logout"); 
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      sessionStorage.clear();
-      navigate("/", { replace: true });
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    sessionStorage.clear();
+    navigate("/", { replace: true });
   };
 
   return (
     <div className="db-root">
-
       
       <header className="db-header">
         <div className="db-logo">AcePrep</div>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </header>
 
-     
+      
       <div className="db-hero">
         <h1>Your Interview Command Center</h1>
         <p>Practice smarter, learn faster, and walk into every interview with confidence.</p>
@@ -92,51 +87,117 @@ export default function Dashboard() {
 
       
       <div className="db-section">
-        <div className="db-section-title">
-          Quick <span>Actions</span>
-        </div>
-
+        <div className="db-section-title">Quick <span>Actions</span></div>
         <div className="db-grid-3">
           <div className="db-card">
             <span className="material-symbols-outlined db-card-icon">upload_file</span>
             <h2>Resume Upload Interview</h2>
             <p>Get a personalized interview tailored to your resume and experience.</p>
-            <button className="db-btn-primary" onClick={() => navigate("/resume-upload")}>
-              Upload Resume
-            </button>
+            <button className="db-btn-primary" onClick={() => navigate("/resume-upload")}>Upload Resume</button>
           </div>
-
           <div className="db-card">
             <span className="material-symbols-outlined db-card-icon">play_circle</span>
             <h2>Start Topic Interview</h2>
-            <p>Choose any subject and practice answering real-world interview questions.</p>
-            <button className="db-btn-primary" onClick={() => navigate("/start-interview")}>
-              Start Interview
-            </button>
+            <p>Choose any subject and practice answering real world interview questions.</p>
+            <button className="db-btn-primary" onClick={() => navigate("/start-interview")}>Start Interview</button>
           </div>
-
           <div className="db-card">
             <span className="material-symbols-outlined db-card-icon">history</span>
             <h2>Past Interviews</h2>
             <p>Review your sessions, analyse your mistakes, and track your growth.</p>
-            <button className="db-btn-primary" onClick={() => navigate("/history")}>
-              View Interviews
-            </button>
+            <button className="db-btn-primary" onClick={() => navigate("/history")}>View Interviews</button>
           </div>
         </div>
       </div>
 
-     
-      <div className="db-section">
-        <div className="db-section-title center">
-          <span>FAQ</span>
-        </div>
+      <div className="db-divider" />
 
+      
+      <div className="db-section">
+        <div className="db-section-title">How It <span>Works</span></div>
+        <div className="db-grid-3">
+          <div className="hiw-card">
+            <div className="hiw-step">01</div>
+            <span className="hiw-icon material-symbols-outlined">description</span>
+            <h3>Set Up Your Interview</h3>
+            <p>Upload your resume or pick a topic. AcePrep instantly generates questions tailored to your profile, role, and skill level no generic templates.</p>
+          </div>
+          <div className="hiw-card">
+            <div className="hiw-step">02</div>
+            <span className="hiw-icon material-symbols-outlined">smart_toy</span>
+            <h3>Interview with AI</h3>
+            <p>Answer questions in real time. Our Groq-powered AI listens, follows up, and adapts just like a real interviewer would in a live session.</p>
+          </div>
+          <div className="hiw-card">
+            <div className="hiw-step">03</div>
+            <span className="hiw-icon material-symbols-outlined">analytics</span>
+            <h3>Get Scored & Improve</h3>
+            <p>Receive a detailed performance score, pinpoint your weak areas, and see exactly how you should have answered each question then come back and try again.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="db-divider" />
+
+      
+      <div className="db-section">
+        <div className="db-section-title">Who We <span>Serve</span></div>
+        <div className="wws-grid">
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">school</span>
+            <h3>Fresh Graduates</h3>
+            <p>Land your first job by practicing common entry level technical and HR questions with instant feedback.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">work</span>
+            <h3>Experienced Pros</h3>
+            <p>Sharpen your skills for senior roles with deep dive system design and behavioral interview rounds.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">sync_alt</span>
+            <h3>Career Switchers</h3>
+            <p>Transitioning to a new domain? Practice domain specific questions to build confidence in your new field.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">public</span>
+            <h3>Remote Job Seekers</h3>
+            <p>Get ready for video and async interviews. AcePrep mirrors real online interview environments.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">rocket_launch</span>
+            <h3>Startup Founders</h3>
+            <p>Prepare for investor pitches and product interviews by sharpening your storytelling and clarity.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="db-divider" />
+
+      
+      <div className="db-section">
+        <div className="db-section-title center"><span>FAQ</span></div>
         <div className="faq-section">
           <div className="faq-list">
-            {faqs.map((f, i) => (
-              <FAQItem key={i} q={f.q} a={f.a} />
-            ))}
+            {faqs.map((f, i) => <FAQItem key={i} q={f.q} a={f.a} />)}
+          </div>
+        </div>
+      </div>
+
+      <div className="db-divider" />
+
+      
+      <div className="db-section">
+        <div className="db-section-title center">Contact <span>Us</span></div>
+        <div className="contact-section">
+          <div className="contact-box">
+            <div>
+              <h3>Have questions or feedback?</h3>
+              <p>I'd love to hear from you. Reach out anytime, We usually reply within a day.</p>
+            </div>
+            <a className="contact-mail" href="mailto:aceprepx@gmail.com">
+              <span className="material-symbols-outlined">mail</span>
+              aceprepx@gmail.com
+            </a>
           </div>
         </div>
       </div>
@@ -146,17 +207,15 @@ export default function Dashboard() {
         <div className="f-logo">AcePrep</div>
         <p>© {new Date().getFullYear()} AcePrep. All rights reserved.</p>
         <div className="f-tag">
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "0.78rem", marginRight: "4px" }}
-          >
-            bolt
-          </span>
+          <span className="material-symbols-outlined" style={{ fontSize: '0.78rem', marginRight: '4px' }}>bolt</span>
           Powered by Groq AI
         </div>
       </footer>
 
+      
       <ScrollToTopButton />
     </div>
   );
 }
+
+

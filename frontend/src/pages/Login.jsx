@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../services/api";
+import API, { clearManualLogout } from "../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -9,6 +9,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+ 
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,34 +24,39 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      
+      await API.post("/auth/login", {
+        email,
+        password,
+      });
 
-      // 🔥 If you are using token in response
-      if (res?.data?.token) {
-        localStorage.setItem("token", res.data.token);
-      }
+      
+      clearManualLogout();
 
-      // Small delay to ensure state updates properly
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 200);
+      
+      navigate("/dashboard", { replace: true });
 
     } catch (err) {
-      console.log("Login error:", err);
+      console.error("Login error:", err);
+
       setError(
         err?.response?.data?.message ||
         "Login failed. Please try again."
       );
+
     } finally {
       setLoading(false);
     }
   };
+
+  
 
   return (
     <div className="auth-container">
       <h1>AcePrep Login</h1>
 
       <form onSubmit={handleLogin} className="auth-form">
+
         <input
           type="email"
           className="auth-input"
@@ -66,19 +73,31 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit" className="auth-btn" disabled={loading}>
+        <button
+          type="submit"
+          className="auth-btn"
+          disabled={loading}
+        >
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        {error && <p className="auth-error">{error}</p>}
+        {error && (
+          <p className="auth-error">{error}</p>
+        )}
+
       </form>
 
       <p className="auth-link">
-        <Link to="/forgot-password">Forgot Password?</Link>
+        <Link to="/forgot-password">
+          Forgot Password?
+        </Link>
       </p>
 
       <p className="auth-link">
-        New user? <Link to="/register">Create an account</Link>
+        New user?{" "}
+        <Link to="/register">
+          Create an account
+        </Link>
       </p>
     </div>
   );

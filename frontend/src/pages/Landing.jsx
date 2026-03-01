@@ -6,17 +6,29 @@ export default function Landing() {
   const navigate = useNavigate();
 
  
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
+
+        
+        
+        const loggedOut =
+          sessionStorage.getItem("manualLogout");
+
+        if (loggedOut) {
+          console.log("Manual logout detected");
+          return;
+        }
+
         
         await API.get("/auth/me");
 
-       
-        navigate("/dashboard", { replace: true });
+        navigate("/dashboard", {
+          replace: true,
+        });
 
-      } catch (error) {
-        
+      } catch {
         console.log("User not authenticated");
       }
     };
@@ -24,10 +36,12 @@ export default function Landing() {
     checkAuth();
   }, [navigate]);
 
+ 
+
   return (
     <div className="lp-root">
 
-     
+      
       <nav className="lp-nav">
         <div className="lp-logo">AcePrep</div>
 
@@ -65,8 +79,8 @@ export default function Landing() {
         </h1>
 
         <p className="hero-sub">
-          Practice smarter, learn faster, and walk into every
-          interview with confidence powered by real time AI.
+          Practice smarter, learn faster, and walk
+          into every interview with confidence.
         </p>
 
         <div className="hero-btns">
@@ -86,7 +100,7 @@ export default function Landing() {
         </div>
       </section>
 
-     
+      
       <div className="stats-bar">
         <div className="stat-item">
           <div className="stat-num">5k+</div>
@@ -127,7 +141,7 @@ export default function Landing() {
             <h3>Start Topic Interview</h3>
 
             <p>
-              Choose any subject and practice answering
+              Choose any subject and practice
               real-world interview questions.
             </p>
 
@@ -141,7 +155,7 @@ export default function Landing() {
         </div>
       </section>
 
-     
+      
       <section className="lp-how">
         <h2 className="section-title">
           How It <span className="title-accent">Works</span>
@@ -151,27 +165,19 @@ export default function Landing() {
           <div className="step-card">
             <div className="step-number">01</div>
             <h3>Create Your Account</h3>
-            <p>
-              Sign up free in seconds. No credit card required.
-            </p>
+            <p>Sign up free in seconds.</p>
           </div>
 
           <div className="step-card">
             <div className="step-number">02</div>
             <h3>Choose Your Path</h3>
-            <p>
-              Upload your resume or pick a topic to drill
-              specific skills.
-            </p>
+            <p>Select topic or upload resume.</p>
           </div>
 
           <div className="step-card">
             <div className="step-number">03</div>
             <h3>Get Instant Feedback</h3>
-            <p>
-              Receive hiring verdicts, scores, strengths,
-              and improvement plans.
-            </p>
+            <p>Receive hiring verdicts instantly.</p>
           </div>
         </div>
       </section>
@@ -181,10 +187,6 @@ export default function Landing() {
         <div className="cta-glow" />
 
         <h2>Ready to Ace Your Next Interview?</h2>
-        <p>
-          Join thousands of developers practicing smarter
-          with AcePrep.
-        </p>
 
         <div className="hero-btns">
           <button
@@ -203,13 +205,13 @@ export default function Landing() {
         </div>
       </div>
 
-    
+      
       <footer className="lp-footer">
         <div>
           AcePrep © {new Date().getFullYear()}
         </div>
         <div>
-          Built with Love for ambitious developers
+          Built with Love for developers
         </div>
       </footer>
 

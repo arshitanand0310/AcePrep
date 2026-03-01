@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://aceprep-backend-i0ao.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

@@ -27,8 +27,8 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const cookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
+  secure: true,          
+  sameSite: "none",      
   path: "/",
 };
 
@@ -39,9 +39,7 @@ export const register = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password)
-      return res.status(400).json({
-        message: "All fields required",
-      });
+      return res.status(400).json({ message: "All fields required" });
 
     const existingUser = await User.findOne({
       email: email.toLowerCase(),
@@ -71,17 +69,14 @@ export const register = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(201).json({
-      message: "User registered successfully",
-    });
+    res.status(201).json({ message: "Registered successfully" });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      message: "Registration failed",
-    });
+    res.status(500).json({ message: "Registration failed" });
   }
 };
+
 
 
 export const login = async (req, res) => {
@@ -93,19 +88,12 @@ export const login = async (req, res) => {
     }).select("+password");
 
     if (!user)
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
+      return res.status(400).json({ message: "Invalid credentials" });
 
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match)
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
@@ -120,15 +108,11 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      message: "Login successful",
-    });
+    res.status(200).json({ message: "Login successful" });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      message: "Login failed",
-    });
+    res.status(500).json({ message: "Login failed" });
   }
 };
 
@@ -136,34 +120,27 @@ export const login = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
+    const token = req.cookies?.refreshToken;
 
     if (!token)
-      return res.status(401).json({
-        message: "No refresh token",
-      });
+      return res.status(401).json({ message: "No refresh token" });
 
     const decoded = jwt.verify(
       token,
       process.env.JWT_REFRESH_SECRET
     );
 
-    const newAccessToken =
-      generateAccessToken(decoded.id);
+    const newAccessToken = generateAccessToken(decoded.id);
 
     res.cookie("accessToken", newAccessToken, {
       ...cookieOptions,
       maxAge: 15 * 60 * 1000,
     });
 
-    res.status(200).json({
-      message: "Token refreshed",
-    });
+    res.json({ message: "Token refreshed" });
 
   } catch {
-    res.status(401).json({
-      message: "Invalid refresh token",
-    });
+    res.status(401).json({ message: "Invalid refresh token" });
   }
 };
 
@@ -173,15 +150,8 @@ export const logout = async (req, res) => {
   try {
 
     
-    res.cookie("accessToken", "", {
-      ...cookieOptions,
-      maxAge: 0,
-    });
-
-    res.cookie("refreshToken", "", {
-      ...cookieOptions,
-      maxAge: 0,
-    });
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
 
     res.status(200).json({
       message: "Logged out successfully",
@@ -197,85 +167,10 @@ export const logout = async (req, res) => {
 
 
 
-export const forgotPassword = async (req, res) => {
-  try {
-    const user = await User.findOne({
-      email: req.body.email.toLowerCase(),
-    });
-
-    if (!user)
-      return res.status(404).json({
-        message: "User not found",
-      });
-
-    const resetToken =
-      crypto.randomBytes(32).toString("hex");
-
-    user.resetPasswordToken =
-      crypto.createHash("sha256")
-        .update(resetToken)
-        .digest("hex");
-
-    user.resetPasswordExpire =
-      Date.now() + 15 * 60 * 1000;
-
-    await user.save({ validateBeforeSave: false });
-
-    res.status(200).json({
-      resetLink:
-        `${process.env.FRONTEND_URL}/reset-password/${resetToken}`,
-    });
-
-  } catch {
-    res.status(500).json({
-      message: "Reset failed",
-    });
-  }
-};
-
-
-
-export const resetPassword = async (req, res) => {
-  try {
-    const hashedToken =
-      crypto.createHash("sha256")
-        .update(req.params.token)
-        .digest("hex");
-
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpire: { $gt: Date.now() },
-    }).select("+password");
-
-    if (!user)
-      return res.status(400).json({
-        message: "Invalid or expired token",
-      });
-
-    user.password = req.body.password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-
-    await user.save();
-
-    res.json({
-      message: "Password updated",
-    });
-
-  } catch {
-    res.status(500).json({
-      message: "Reset failed",
-    });
-  }
-};
-
-
-
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(
-      req.user.id
-    ).select("-password");
+    const user = await User.findById(req.user.id)
+      .select("-password");
 
     res.json(user);
 

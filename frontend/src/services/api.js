@@ -2,17 +2,11 @@ import axios from "axios";
 
 
 
-const baseURL =
-  import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : "http://localhost:5000/api";
-
-
 
 const API = axios.create({
-  baseURL,
+  baseURL: "/api",
   withCredentials: true,
-  timeout: 180000, 
+  timeout: 180000,
 });
 
 
@@ -20,8 +14,6 @@ const API = axios.create({
 let isRefreshing = false;
 let failedQueue = [];
 let manualLogout = false;
-
-
 
 export const setManualLogout = () => {
   manualLogout = true;
@@ -77,14 +69,12 @@ API.interceptors.response.use(
       url.includes("/auth/register") ||
       url.includes("/auth/logout") ||
       url.includes("/auth/refresh") ||
-      url.includes("/auth/me") ||
-      url.includes("/report") ||
-      url.includes("/interview")
+      url.includes("/auth/me")
     ) {
       return Promise.reject(error);
     }
 
-
+    
     if (sessionStorage.getItem("manualLogout")) {
       return Promise.reject(error);
     }

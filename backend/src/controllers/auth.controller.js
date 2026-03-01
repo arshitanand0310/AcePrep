@@ -25,9 +25,17 @@ const generateRefreshToken = (id) => {
 
 const cookieOptions = {
   httpOnly: true,
-  secure: true,       
-  sameSite: "none",   
-  path: "/",          
+  secure: true,
+  sameSite: "none",
+  path: "/",
+};
+
+const clearCookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  expires: new Date(0), 
 };
 
 
@@ -39,10 +47,12 @@ export const register = async (req, res) => {
     const password = req.body.password?.trim();
 
     if (!name || !email || !password)
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields required" });
 
     if (password.length < 6)
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
 
     const existingUser = await User.findOne({ email });
     if (existingUser)
@@ -51,7 +61,7 @@ export const register = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password, 
+      password,
     });
 
     const accessToken = generateAccessToken(user._id);
@@ -90,15 +100,23 @@ export const login = async (req, res) => {
     const password = req.body.password?.trim();
 
     if (!email || !password)
-      return res.status(400).json({ message: "Email and password required" });
+      return res.status(400).json({
+        message: "Email and password required",
+      });
 
     const user = await User.findOne({ email }).select("+password");
+
     if (!user)
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
 
     const match = await bcrypt.compare(password, user.password);
+
     if (!match)
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
 
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
@@ -132,16 +150,24 @@ export const login = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
+    const token = req.cookies?.refreshToken;
 
     if (!token)
-      return res.status(401).json({ message: "No refresh token" });
+      return res.status(401).json({
+        message: "Refresh token missing",
+      });
 
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_SECRET
+    );
+
     const user = await User.findById(decoded.id);
 
     if (!user)
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({
+        message: "User not found",
+      });
 
     const newAccessToken = generateAccessToken(user._id);
 
@@ -150,20 +176,35 @@ export const refreshToken = async (req, res) => {
       maxAge: 15 * 60 * 1000,
     });
 
-    res.status(200).json({ message: "Access token refreshed" });
+    res.status(200).json({
+      message: "Access token refreshed",
+    });
 
   } catch (error) {
-    res.status(401).json({ message: "Invalid refresh token" });
+    return res.status(401).json({
+      message: "Invalid refresh token",
+    });
   }
 };
 
 
 
-export const logout = (req, res) => {
-  res.clearCookie("accessToken", cookieOptions);
-  res.clearCookie("refreshToken", cookieOptions);
+export const logout = async (req, res) => {
+  try {
 
-  res.status(200).json({ message: "Logged out successfully" });
+    res.clearCookie("accessToken", clearCookieOptions);
+    res.clearCookie("refreshToken", clearCookieOptions);
+
+    return res.status(200).json({
+      message: "Logged out successfully",
+    });
+
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      message: "Logout failed",
+    });
+  }
 };
 
 
@@ -171,10 +212,13 @@ export const logout = (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const email = req.body.email?.toLowerCase().trim();
+
     const user = await User.findOne({ email });
 
     if (!user)
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -184,11 +228,13 @@ export const forgotPassword = async (req, res) => {
       .digest("hex");
 
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpire = new Date(Date.now() + 15 * 60 * 1000);
+    user.resetPasswordExpire =
+      new Date(Date.now() + 15 * 60 * 1000);
 
     await user.save({ validateBeforeSave: false });
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetLink =
+      `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     res.status(200).json({
       message: "Reset link generated",
@@ -196,8 +242,10 @@ export const forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Forgot password error:", error);
-    res.status(500).json({ message: "Failed to generate reset link" });
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to generate reset link",
+    });
   }
 };
 
@@ -209,7 +257,9 @@ export const resetPassword = async (req, res) => {
     const password = req.body.password?.trim();
 
     if (!password || password.length < 6)
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
 
     const hashedToken = crypto
       .createHash("sha256")
@@ -222,19 +272,24 @@ export const resetPassword = async (req, res) => {
     }).select("+password");
 
     if (!user)
-      return res.status(400).json({ message: "Invalid or expired reset link" });
+      return res.status(400).json({
+        message: "Invalid or expired reset link",
+      });
 
-    user.password = password; 
+    user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
     await user.save();
 
-    res.status(200).json({ message: "Password updated successfully" });
+    res.status(200).json({
+      message: "Password updated successfully",
+    });
 
   } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(500).json({ message: "Password reset failed" });
+    res.status(500).json({
+      message: "Password reset failed",
+    });
   }
 };
 
@@ -242,9 +297,14 @@ export const resetPassword = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id)
+      .select("-password");
+
     res.status(200).json(user);
+
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch user" });
+    res.status(500).json({
+      message: "Failed to fetch user",
+    });
   }
 };

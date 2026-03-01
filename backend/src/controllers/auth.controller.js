@@ -23,19 +23,13 @@ const generateRefreshToken = (id) => {
 
 
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: "none",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   path: "/",
-};
-
-const clearCookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  path: "/",
-  expires: new Date(0), 
 };
 
 
@@ -87,7 +81,7 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Register error:", error);
+    console.error(error);
     res.status(500).json({ message: "Registration failed" });
   }
 };
@@ -141,7 +135,7 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Login error:", error);
+    console.error(error);
     res.status(500).json({ message: "Login failed" });
   }
 };
@@ -163,7 +157,6 @@ export const refreshToken = async (req, res) => {
     );
 
     const user = await User.findById(decoded.id);
-
     if (!user)
       return res.status(401).json({
         message: "User not found",
@@ -180,8 +173,8 @@ export const refreshToken = async (req, res) => {
       message: "Access token refreshed",
     });
 
-  } catch (error) {
-    return res.status(401).json({
+  } catch {
+    res.status(401).json({
       message: "Invalid refresh token",
     });
   }
@@ -192,15 +185,23 @@ export const refreshToken = async (req, res) => {
 export const logout = async (req, res) => {
   try {
 
-    res.clearCookie("accessToken", clearCookieOptions);
-    res.clearCookie("refreshToken", clearCookieOptions);
+    
+    res.cookie("accessToken", "", {
+      ...cookieOptions,
+      expires: new Date(0),
+    });
 
-    return res.status(200).json({
+    res.cookie("refreshToken", "", {
+      ...cookieOptions,
+      expires: new Date(0),
+    });
+
+    res.status(200).json({
       message: "Logged out successfully",
     });
 
   } catch (error) {
-    console.error("Logout error:", error);
+    console.error(error);
     res.status(500).json({
       message: "Logout failed",
     });
@@ -214,11 +215,8 @@ export const forgotPassword = async (req, res) => {
     const email = req.body.email?.toLowerCase().trim();
 
     const user = await User.findOne({ email });
-
     if (!user)
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -241,8 +239,7 @@ export const forgotPassword = async (req, res) => {
       resetLink,
     });
 
-  } catch (error) {
-    console.error(error);
+  } catch {
     res.status(500).json({
       message: "Failed to generate reset link",
     });
@@ -255,11 +252,6 @@ export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const password = req.body.password?.trim();
-
-    if (!password || password.length < 6)
-      return res.status(400).json({
-        message: "Password must be at least 6 characters",
-      });
 
     const hashedToken = crypto
       .createHash("sha256")
@@ -286,7 +278,7 @@ export const resetPassword = async (req, res) => {
       message: "Password updated successfully",
     });
 
-  } catch (error) {
+  } catch {
     res.status(500).json({
       message: "Password reset failed",
     });
@@ -302,7 +294,7 @@ export const getMe = async (req, res) => {
 
     res.status(200).json(user);
 
-  } catch (error) {
+  } catch {
     res.status(500).json({
       message: "Failed to fetch user",
     });

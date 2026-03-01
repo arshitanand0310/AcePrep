@@ -8,7 +8,7 @@ const baseURL =
 const API = axios.create({
     baseURL,
     withCredentials: true,
-    timeout: 60000,
+    timeout: 180000,
 });
 
 let isRefreshing = false;
@@ -21,17 +21,15 @@ export const resetLogoutState = () => {
 
 function triggerLogout(reason = "Session expired") {
     console.warn("🔒 Logout:", reason);
-
     isLoggedOut = true;
-
     sessionStorage.clear();
     window.dispatchEvent(new Event("auth-logout"));
 }
 
 const processQueue = (error) => {
-    failedQueue.forEach((prom) => {
-        error ? prom.reject(error) : prom.resolve();
-    });
+    failedQueue.forEach((p) =>
+        error ? p.reject(error) : p.resolve()
+    );
     failedQueue = [];
 };
 
@@ -41,8 +39,13 @@ API.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (!error.response)
-            return Promise.reject(error);
+        
+        if (!error.response) {
+            console.warn("Backend waking...");
+            return new Promise((resolve) =>
+                setTimeout(() => resolve(API(originalRequest)), 5000)
+            );
+        }
 
         const url = originalRequest?.url || "";
 
@@ -51,7 +54,9 @@ API.interceptors.response.use(
             url.includes("/auth/register") ||
             url.includes("/auth/refresh") ||
             url.includes("/auth/me") ||
-            url.includes("/auth/logout")
+            url.includes("/auth/logout") ||
+            url.includes("/report") ||
+            url.includes("/interview")
         ) {
             return Promise.reject(error);
         }
@@ -78,7 +83,7 @@ API.interceptors.response.use(
 
             } catch (refreshError) {
                 processQueue(refreshError);
-                triggerLogout("Session expired");
+                triggerLogout();
                 return Promise.reject(refreshError);
 
             } finally {

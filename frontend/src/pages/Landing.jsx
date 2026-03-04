@@ -207,12 +207,8 @@ export default function Landing() {
 
       
       <footer className="lp-footer">
-        <div>
-          AcePrep © {new Date().getFullYear()}
-        </div>
-        <div>
-          Built with Love for developers
-        </div>
+        <div>AcePrep © {new Date().getFullYear()}</div>
+        <div>Built with Love for ambitious developers</div>
       </footer>
 
     </div>

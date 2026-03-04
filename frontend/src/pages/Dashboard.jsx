@@ -251,6 +251,24 @@ export default function Dashboard() {
 
       <div className="db-divider" />
 
+
+            
+      <div className="db-section">
+        <div className="db-section-title center">Contact <span>Us</span></div>
+        <div className="contact-section">
+          <div className="contact-box">
+            <div>
+              <h3>Have questions or feedback?</h3>
+              <p>I'd love to hear from you. Reach out anytime, We usually reply within a day.</p>
+            </div>
+            <a className="contact-mail" href="mailto:aceprepx@gmail.com">
+              <span className="material-symbols-outlined">mail</span>
+              aceprepx@gmail.com
+            </a>
+          </div>
+        </div>
+      </div>
+
       
 
 

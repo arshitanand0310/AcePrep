@@ -165,19 +165,23 @@ export default function Landing() {
           <div className="step-card">
             <div className="step-number">01</div>
             <h3>Create Your Account</h3>
-            <p>Sign up free in seconds.</p>
+            <p>Sign up free in seconds. No credit card required.</p>
           </div>
 
           <div className="step-card">
             <div className="step-number">02</div>
             <h3>Choose Your Path</h3>
-            <p>Select topic or upload resume.</p>
+            <p>
+              Upload your resume or pick a topic to drill down on specific skills.
+            </p>
           </div>
 
           <div className="step-card">
             <div className="step-number">03</div>
             <h3>Get Instant Feedback</h3>
-            <p>Receive hiring verdicts instantly.</p>
+            <p>
+              Receive hiring verdicts, scores, strengths, and improvement plans.
+            </p>
           </div>
         </div>
       </section>

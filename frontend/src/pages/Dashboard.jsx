@@ -174,6 +174,33 @@ export default function Dashboard() {
       <div className="db-divider" />
 
 
+            <div className="db-section">
+        <div className="db-section-title">How It <span>Works</span></div>
+        <div className="db-grid-3">
+          <div className="hiw-card">
+            <div className="hiw-step">01</div>
+            <span className="hiw-icon material-symbols-outlined">description</span>
+            <h3>Set Up Your Interview</h3>
+            <p>Upload your resume or pick a topic. AcePrep instantly generates questions tailored to your profile, role, and skill level no generic templates.</p>
+          </div>
+          <div className="hiw-card">
+            <div className="hiw-step">02</div>
+            <span className="hiw-icon material-symbols-outlined">smart_toy</span>
+            <h3>Interview with AI</h3>
+            <p>Answer questions in real time. Our Groq-powered AI listens, follows up, and adapts just like a real interviewer would in a live session.</p>
+          </div>
+          <div className="hiw-card">
+            <div className="hiw-step">03</div>
+            <span className="hiw-icon material-symbols-outlined">analytics</span>
+            <h3>Get Scored & Improve</h3>
+            <p>Receive a detailed performance score, pinpoint your weak areas, and see exactly how you should have answered each question then come back and try again.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="db-divider" />
+
+
       <div className="db-section">
         <div className="db-section-title">Who We <span>Serve</span></div>
         <div className="wws-grid">

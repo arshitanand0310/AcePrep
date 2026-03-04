@@ -272,9 +272,11 @@ export default function Dashboard() {
      
       <footer>
         <div className="f-logo">AcePrep</div>
-        <p>
-          © {new Date().getFullYear()} AcePrep
-        </p>
+        <p>© {new Date().getFullYear()} AcePrep. All rights reserved.</p>
+        <div className="f-tag">
+          <span className="material-symbols-outlined" style={{ fontSize: '0.78rem', marginRight: '4px' }}>bolt</span>
+          Powered by Groq AI
+        </div>
       </footer>
 
       <ScrollToTopButton />

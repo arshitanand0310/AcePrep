@@ -8,39 +8,47 @@ import ScrollToTopButton from "./ScrollToTopButton";
 const faqs = [
   {
     q: "Is AcePrep suitable for beginners?",
-    a: "Absolutely. AcePrep adjusts question difficulty based on your topic and experience level.",
+    a: "Absolutely. AcePrep adjusts question difficulty based on your topic and experience level. Whether you're just starting out or have years of experience, you'll get relevant, tailored questions.",
   },
   {
     q: "How does the AI scoring work?",
-    a: "AI analyzes clarity, depth, relevance, and communication to generate feedback.",
+    a: "After each interview, our AI analyzes your responses for clarity, depth, relevance, and communication. You receive a detailed score with specific feedback on what you did well and what to improve.",
   },
   {
     q: "Can I practice for specific job roles?",
-    a: "Yes! Upload your resume or choose topics manually.",
+    a: "Yes! You can either upload your resume for a personalized interview or manually choose a topic like Data Structures, System Design, Product Management, HR, and more.",
   },
   {
     q: "Are my interviews saved automatically?",
-    a: "Yes, every interview session is saved to your history.",
+    a: "Yes, every interview session is saved to your history. You can revisit them anytime, review your answers, see model answers, and track your improvement over time.",
   },
   {
     q: "Which AI model powers AcePrep?",
-    a: "AcePrep uses Groq API for ultra-fast responses.",
+    a: "AcePrep uses the Groq API for ultra fast, real time AI responses making your interviews feel natural and fluid, just like talking to a real interviewer.",
   },
+
+  
   {
-    q: "Is my resume secure?",
-    a: "Yes. Your data is encrypted and never shared.",
+    q: "Is my resume and interview data secure?",
+    a: "Yes. Your resume and interview responses are securely stored and never shared with third parties. We prioritize user privacy and data protection at every step.",
   },
+
+  
   {
-    q: "Does AcePrep simulate real interviews?",
-    a: "Yes. Questions mirror real-world company interviews.",
+    q: "Does AcePrep simulate real company interviews?",
+    a: "Yes. AcePrep is designed to mirror real world interview scenarios. Questions focus on reasoning, trade offs, problem solving, and communication similar to actual technical interviews at top companies.",
   },
+
+  
   {
-    q: "Can I track improvement?",
-    a: "Yes. Performance history helps you improve over time.",
+    q: "Can I track my improvement over time?",
+    a: "Absolutely. Your past interviews are saved with detailed scores and feedback, allowing you to compare performance, identify patterns, and continuously improve your interview skills.",
   },
+
+  
   {
-    q: "What makes AcePrep different?",
-    a: "Dynamic AI interviews instead of static question banks.",
+    q: "What makes AcePrep different from other interview platforms?",
+    a: "Unlike static question banks, AcePrep generates dynamic, personalized interviews powered by AI. Every session adapts to your profile, difficulty level, and responses making each interview unique.",
   },
 ];
 
@@ -160,6 +168,40 @@ export default function Dashboard() {
             </button>
           </div>
 
+        </div>
+      </div>
+
+      <div className="db-divider" />
+
+
+      <div className="db-section">
+        <div className="db-section-title">Who We <span>Serve</span></div>
+        <div className="wws-grid">
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">school</span>
+            <h3>Fresh Graduates</h3>
+            <p>Land your first job by practicing common entry level technical and HR questions with instant feedback.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">work</span>
+            <h3>Experienced Pros</h3>
+            <p>Sharpen your skills for senior roles with deep dive system design and behavioral interview rounds.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">sync_alt</span>
+            <h3>Career Switchers</h3>
+            <p>Transitioning to a new domain? Practice domain specific questions to build confidence in your new field.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">public</span>
+            <h3>Remote Job Seekers</h3>
+            <p>Get ready for video and async interviews. AcePrep mirrors real online interview environments.</p>
+          </div>
+          <div className="wws-card">
+            <span className="wws-icon material-symbols-outlined">rocket_launch</span>
+            <h3>Startup Founders</h3>
+            <p>Prepare for investor pitches and product interviews by sharpening your storytelling and clarity.</p>
+          </div>
         </div>
       </div>
 
